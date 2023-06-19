@@ -4,12 +4,10 @@
 
 # Load required packages
 library(raster)
-is1 <- raster('IS1_raster_14km.tif')
-is1_raster <- raster('Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/IS1_raster_1dot7km.tif')
-#is1_98percent <- raster('IS1_raster_14km_98percent.tif')
 library(ggplot2)
 library(dplyr)
-
+# Load required packages
+library(arrow)
 # 
 # gedi_fsbd <- read.csv('GEDIcalvalMetrics.csv')
 # 
@@ -95,18 +93,18 @@ library(dplyr)
 # dev.off()
 
 
+is1_raster <- raster('Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/IS1_raster_1dot7km.tif')
+
 ################################################
 ##################
 #################Compare with GEDI real shots 
 #####################################################################
-# Load required packages
-library(arrow)
+
 
 # Read Parquet data
-df_gedi_Parquet<- read_parquet("calval_20230417.parquet") ### 10G data  ## takes time to read
-
+df_gedi_Parquet<- read_parquet("Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Data/calval_20230417.parquet") ### 10G data  ## takes time to read
 ## file in pc 
-df_gedi_Parquet<- read_parquet("C:/Users/lxiong/Desktop/Data/calval_20230417.parquet")
+#df_gedi_Parquet<- read_parquet("C:/Users/lxiong/Desktop/Data/calval_20230417.parquet")
 
 ### data L2A
 #  geolocation/rh_a1_098
