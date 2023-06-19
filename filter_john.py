@@ -37,7 +37,7 @@ granule_mask = np.array([(True if g in excluded_granules[t] else False) if t in 
 df_valid = df_valid.assign(granule_mask=granule_mask)
 
 
-
+# Identify quality crossovers (valid crossovers with quality colocation and minimum acceptable waveform fidelity)
 
 
 c = df.loc[valid,'/gedi/gedi_rh_a2/sensitivity'].to_numpy()
