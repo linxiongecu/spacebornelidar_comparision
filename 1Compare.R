@@ -102,7 +102,7 @@ is1_raster <- raster('Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/IS1_raster_1d
 
 
 # Read Parquet data
-df_gedi_Parquet<- read_parquet("Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Data/calval_20230417.parquet") ### 10G data  ## takes time to read
+#df_gedi_Parquet<- read_parquet("Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Data/calval_20230417.parquet") ### 10G data  ## takes time to read
 ## file in pc 
 #df_gedi_Parquet<- read_parquet("C:/Users/lxiong/Desktop/Data/calval_20230417.parquet")
 
