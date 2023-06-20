@@ -1,6 +1,6 @@
 #### read is1 data
 #### 06/06/2023
-load('icesat_glas_umd_v1.RData')
+load('Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Data/icesat_glas_umd_v1.RData')
 
 glas_veg[1,]
 
@@ -118,5 +118,14 @@ hill <- hillShade(slope, aspect, 40, 270)
 plot(hill,  xlim = c(-180,180), ylim = c(-90, 90),
      col=grey(0:100/100), legend=FALSE, main='IS1 canopy')
 plot(x, col=rainbow(25, alpha=0.35),add=TRUE)
+#################
+########
+
+
+
+
+
+
+
 
 

@@ -93,16 +93,14 @@ library(arrow)
 # dev.off()
 
 
-is1_raster <- raster('Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/IS1_raster_1dot7km.tif')
+is1_raster <- raster('Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Out/IS1_raster_1dot7km.tif')
 
 ################################################
 ##################
 #################Compare with GEDI real shots 
 #####################################################################
-
-
 # Read Parquet data
-#df_gedi_Parquet<- read_parquet("Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Data/calval_20230417.parquet") ### 10G data  ## takes time to read
+df_gedi_Parquet<- read_parquet("Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Data/calval_john_filters_06192023.parquet") ### 10G data  ## takes time to read
 ## file in pc 
 #df_gedi_Parquet<- read_parquet("C:/Users/lxiong/Desktop/Data/calval_20230417.parquet")
 
@@ -155,18 +153,6 @@ gedi_shots<- data.frame(gedi_shots)
 #gedi_shots[, 1:22] <- as.data.frame(lapply(gedi_shots[, 1:22], as.numeric)) # takes too much time
 #summary(gedi_shots)
 
-### do we have duplicate shots here ?
-gedi_shots %>% filter( X20 == 19660500200096920)
-
-## outlier
-gedi_shots %>% filter( X20 == 78470600300588016)
-gedi_shots %>% filter( X20 == 111830200200267280)
-outlier <- gedi_shots %>% filter( X20 == 210660800200257248)
-
-
-
-
-
 # save the data
 #write.csv(gedi_shots, file = "gedi_shots.csv", row.names = FALSE)
 
@@ -187,27 +173,26 @@ filtered_df <- gedi_shots[gedi_shots$X19 >  0.95
                          # & gedi_shots$X13 == gedi_shots$X14
                           ,  ]
 #### fitler by project name 
-#Read ALS projet name file 
-als_name <- readLines('als_name.txt')
-
-# Remove multiple occurrences of "\t"
-als_name <- gsub("\t+", "", als_name)
-
-# Remove spaces
-als_name  <- gsub("\\s", "", als_name)
-
-als_name <- as.list(als_name)
-
-# Search string
-# Check if the list contains the search name
-contains_name <- 'neon_teak2021' %in% als_name
-
-# Print the result
-print(contains_name)
-
-# Filter rows based on names in the list
-filtered_df <- filtered_df[filtered_df$X23 %in% als_name, ]
-
+# #Read ALS projet name file 
+# als_name <- readLines('als_name.txt')
+# 
+# # Remove multiple occurrences of "\t"
+# als_name <- gsub("\t+", "", als_name)
+# 
+# # Remove spaces
+# als_name  <- gsub("\\s", "", als_name)
+# 
+# als_name <- as.list(als_name)
+# 
+# # Search string
+# # Check if the list contains the search name
+# contains_name <- 'neon_teak2021' %in% als_name
+# 
+# # Print the result
+# print(contains_name)
+# 
+# # Filter rows based on names in the list
+# filtered_df <- filtered_df[filtered_df$X23 %in% als_name, ]
 
 #### leaf on and off 
 ##### Similar to IS1 
@@ -287,27 +272,27 @@ head(filtered_gedi_shots)
 ### come back not working, 
 ### use h3 command 
 
-
-######### read  disturbance data ####
-loss <- read_parquet("Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Calval/forestLoss/loss.parquet") ### extract using gh3
-loss_dt <- cbind(loss$shot_number, loss$loss)  ## 0 false 1: true
-loss_dt<- data.frame(loss_dt)
-#loss_dt <- as.data.frame(lapply(loss_dt, as.numeric))
-colnames(loss_dt) <- c('X20', 'X23_loss')
-loss_dt$X20 <- as.character(loss_dt$X20)
-
-########## read updated disturbance data
-
-hansen_forest_loss <- read_parquet("Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Calval/calval_hansen_forest_loss_20230425_string.parquet"
-                                   ) ### shared by Tiago
-
-hansen_forest_loss <- data.frame(hansen_forest_loss )
-
-head(hansen_forest_loss)
-# Rename the 'old_column_name' to 'new_column_name'
-hansen_forest_loss <- hansen_forest_loss %>%
-  rename(X20 = shot_number) ## to match previous data
-
+# 
+# ######### read  disturbance data ####
+# loss <- read_parquet("Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Calval/forestLoss/loss.parquet") ### extract using gh3
+# loss_dt <- cbind(loss$shot_number, loss$loss)  ## 0 false 1: true
+# loss_dt<- data.frame(loss_dt)
+# #loss_dt <- as.data.frame(lapply(loss_dt, as.numeric))
+# colnames(loss_dt) <- c('X20', 'X23_loss')
+# loss_dt$X20 <- as.character(loss_dt$X20)
+# 
+# ########## read updated disturbance data
+# 
+# hansen_forest_loss <- read_parquet("Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Calval/calval_hansen_forest_loss_20230425_string.parquet"
+#                                    ) ### shared by Tiago
+# 
+# hansen_forest_loss <- data.frame(hansen_forest_loss )
+# 
+# head(hansen_forest_loss)
+# # Rename the 'old_column_name' to 'new_column_name'
+# hansen_forest_loss <- hansen_forest_loss %>%
+#   rename(X20 = shot_number) ## to match previous data
+# 
 
 
 ############### joint 
@@ -332,8 +317,8 @@ options(scipen = 999) # shotnumber is too big
 ## A left_join() keeps all observations in x.
 ## inner_join() only keeps observations from x that have a matching key in y.
 
-merged_file <- left_join(filtered_gedi_shots, hansen_forest_loss, by = "X20")  # by shot number join two data frames. 
-head(merged_file)
+# merged_file <- left_join(filtered_gedi_shots, hansen_forest_loss, by = "X20")  # by shot number join two data frames. 
+# head(merged_file)
 
 #loss_dt %>% filter( X20 == 19660500200096920)
 
@@ -341,18 +326,20 @@ head(merged_file)
 ##############after all filtering ---####
 #########################################
 
-
-
-dt <- merged_file[merged_file$loss < 1, ]
+head(filtered_gedi_shots)
+dt <- filtered_gedi_shots
+#dt <- merged_file[merged_file$loss < 1, ]
 ## remove NA rows
 # Remove rows with NA values
 dt  <- dt [complete.cases(dt ), ]
-write.csv(dt, file = "gedi_calval_shot_filtered_06142023.csv", row.names = FALSE)
+
+write.csv(dt, file = "Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Out/gedi_calval_shot_filtered_06192023.csv", row.names = FALSE)
 
 
 
 #################################################GEDI grid at 0.125 degree
-merged_file <- read.csv('gedi_calval_shot_filtered_06142023.csv')
+#merged_file <- read.csv('gedi_calval_shot_filtered_06142023.csv')
+merged_file<- dt
 head(merged_file)
 
 
@@ -382,16 +369,14 @@ x <- rasterize(merged_file[, 1:2], r, merged_file[,3], fun=mean) # min, max, or 
 # Convert raster to XYZ format
 xyz_data <- rasterToPoints(x)
 # Write the data frame to a CSV file
-write.csv(xyz_data, file = "gedi_calval_shot_filtered_gridded_optimal_filterDisturbance_1dot7km.csv", row.names = FALSE)
+#write.csv(xyz_data, file = "gedi_calval_shot_filtered_gridded_optimal_filterDisturbance_1dot7km.csv", row.names = FALSE)
 
 
 
 
-
+######## Global Comapison???????????????????????????????????????????
 ##########
-gedi_gridded <- read.csv("gedi_calval_shot_filtered_gridded_optimal_filterDisturbance_1dot7km.csv")
-
-
+#gedi_gridded <- read.csv("gedi_calval_shot_filtered_gridded_optimal_filterDisturbance_1dot7km.csv")
 
 GEDI_raster <- raster('Z:/vclgp/xiongl/GEDIglobal/global/global_img.tif')
 
@@ -402,6 +387,10 @@ levelplot(GEDI_raster, margin = FALSE, col.regions = rainbow(100),
 
 # Convert raster to XYZ format
 xyz_data <- rasterToPoints(GEDI_raster)
+######??????????????????????????????????????????????????????????????
+
+
+
 
 x<- xyz_data[,1]
 y<- xyz_data[,2]
@@ -437,7 +426,7 @@ is1_values <- extract(is1_raster , cbind(x, y))
 #gedi_rh98 <-   gedi_gridded$layer
 
 
-gedi_rh98 <-   xyz_data[,3]/100  # cm to m
+gedi_rh98 <-   xyz_data[,3]  # cm to m
 
 #### swith to see
 
@@ -455,6 +444,11 @@ result <- data.frame(result)
 
 # Remove rows with NA values
 result <- result[complete.cases(result), ]
+##########  
+write.csv(result, 
+          file = "Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Out/result_gridded_06192023.csv",
+          row.names = FALSE)
+
 
 
 
@@ -490,7 +484,7 @@ labels <- c(paste('N =',N),
 
 p <- ggplot(result, aes(x = result$is1_values, y = result$gedi_rh98)) +
   geom_bin2d(binwidth = c(1.5, 1.5)) +
-  scale_fill_continuous(type = "viridis", limits=c(0, 500),oob = scales::squish) +
+  scale_fill_continuous(type = "viridis", limits=c(0, 20),oob = scales::squish) +
   #geom_point() +
   theme_bw()+
   theme(plot.title = element_text(hjust = 0.5),
@@ -508,7 +502,7 @@ p
 
 
 # Save the plot as a TIFF file
-tiff("plot_filtered_gridded_98.tiff", width = 6, height = 5, units = "in", res = 300)
+tiff("Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Out/plot_filtered_gridded_0619.tiff", width = 6, height = 5, units = "in", res = 300)
 p
 dev.off()
 
@@ -527,9 +521,8 @@ dev.off()
 #result$is1_values <-tmp2
 
 #### 
-result <- cbind(samples_df$IS1_h,samples_df$GEI_h)
 result <- data.frame(result)  
-colnames(result) <- c('is1_values', 'gedi_rh98')
+
 # Define height class intervals
 height_bins <- cut(result$is1_values, breaks = seq(0.5,60.5))
 
@@ -573,9 +566,9 @@ combined_df <- rbind(df_1, df_2)
 # Remove NA rows
 combined_df <- na.omit(combined_df)
 
-df_1 <- na.omit(df_1 )
+#df_1 <- na.omit(df_1 )
 
-p2 <- ggplot(df_1,aes(x , y , color = type, fill = type)) +
+p2 <- ggplot(combined_df,aes(x , y , color = type, fill = type)) +
       geom_point(aes(shape=type),size =3) +
       scale_color_manual(values = c("mean" = "red", "median" = "blue") )+
       #scale_fill_manual(values = c("mean" = "orange", "median" = "lightblue") )+
@@ -592,11 +585,11 @@ p2 <- ggplot(df_1,aes(x , y , color = type, fill = type)) +
       # geom_text( aes(
       #                                 label = format(n, big.mark = ",", 
       #                                 scientific = FALSE)), vjust = -1, size = 5)+
-      labs(x = "Icesat-1 [m]", y = "GEDI_calval_shots [m]", title = "Median of GEDI at 1/8° from ICESat")
+      labs(x = "Icesat-1 [m]", y = "GEDI_calval_shots [m]", title = "Median of GEDI at 1/64° from ICESat")
 
 p2
 # Save the plot as a TIFF file
-tiff("plot_median_mean_filtered_within1km.tiff", width = 6, height = 5, units = "in", res = 300)
+tiff("Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Out/plot_median_mean_1over64degree.tiff", width = 6, height = 5, units = "in", res = 300)
 p2
 dev.off()
 

@@ -5,38 +5,36 @@ library(sf)
 ############each 0.125 degree grid, what is the sampling area ????
 ############ common grid have samples;
 
-###### Step 1 get command grids
-gedi_gridded <- read.csv("gedi_calval_shot_filtered_gridded_optimal_filterDisturbance.csv")
-# Extract raster values at the specified coordinates
-x <- gedi_gridded$x
-y <- gedi_gridded$y
-is1 <- raster('IS1_raster_14km.tif')
-is1_values <- extract(is1 , cbind(x, y))
-gedi_rh98 <-   gedi_gridded$layer
-result <- cbind(x, y,  gedi_rh98, is1_values)
-#result <- cbind(x, y,  gedi_rh98, is1_values_98percent)
-result <- data.frame(result)
-# Remove rows with NA values
-result <- result[complete.cases(result), ]
+# ###### Step 1 get command grids
+# gedi_gridded <- read.csv("gedi_calval_shot_filtered_gridded_optimal_filterDisturbance.csv")
+# # Extract raster values at the specified coordinates
+# x <- gedi_gridded$x
+# y <- gedi_gridded$y
+# is1 <- raster('IS1_raster_14km.tif')
+# is1_values <- extract(is1 , cbind(x, y))
+# gedi_rh98 <-   gedi_gridded$layer
+# result <- cbind(x, y,  gedi_rh98, is1_values)
+# #result <- cbind(x, y,  gedi_rh98, is1_values_98percent)
+# result <- data.frame(result)
+# # Remove rows with NA values
+# result <- result[complete.cases(result), ]
 ##### 722 command grids 
-cmgrids <- result
+cmgrids <- read.csv("Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Out/result_gridded_06192023.csv")
 
 ####for each grid , get sample area 
 ### Step 1 filter data by the cell
-gedi_shots_filtered_final <- read.csv('gedi_calval_shot_filtered_06142023.csv')
+gedi_shots_filtered_final <- read.csv('Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Out/gedi_calval_shot_filtered_06192023.csv')
 #gedi_shots_filtered_final<- as.data.frame(lapply(gedi_shots_filtered_final, as.numeric))
-
-load('Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/icesat_glas_umd_v1.RData')
+load('Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Data/icesat_glas_umd_v1.RData')
 is1 <- glas_veg[, c('lon', 'lat', 'ht')]
 
 
 
 library(sf)
 
-
+############Step 2 in each grid, only keep shots of GEDI/IS1 are within 500 m.
 # Create an empty data frame
 samples_df <- data.frame()
-
 #### LOOP THROUGH rows
 #### 
 # Get the number of rows in the data frame
@@ -45,7 +43,6 @@ num_rows <- nrow(cmgrids)
 # Loop through each row
 for (i in 1:num_rows) {
   # Access the row using 'i'
-  i=2
   current_row <- cmgrids[i, ]
   print(paste('Processing Grid Number: ', i))
   
@@ -282,7 +279,7 @@ combined_df <- na.omit(combined_df)
 
 df_1 <- na.omit(df_1 )
 
-p2 <- ggplot(df_1,aes(x , y , color = type, fill = type)) +
+p2 <- ggplot(combined_df,aes(x , y , color = type, fill = type)) +
   geom_point(aes(shape=type),size =3) +
   scale_color_manual(values = c("mean" = "red", "median" = "blue") )+
   #scale_fill_manual(values = c("mean" = "orange", "median" = "lightblue") )+
@@ -293,8 +290,8 @@ p2 <- ggplot(df_1,aes(x , y , color = type, fill = type)) +
         #legend.position = c(0.1, 0.8),
   )+
   geom_abline(slope = 1, intercept = 0, color = "black", linetype = "dashed",linewidth = 1 )+
-  xlim(c(0,42)) +
-  ylim(c(0,42))+
+  xlim(c(0,30)) +
+  ylim(c(0,30))+
   #geom_smooth(method = "lm", linewidth = 2, fullrange = TRUE, se = TRUE) +
   # geom_text( aes(
   #                                 label = format(n, big.mark = ",", 
