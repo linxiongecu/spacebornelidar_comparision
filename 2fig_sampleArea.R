@@ -1,7 +1,7 @@
 ### Fig for sampling area
 library(raster)
 library(sf)
-
+library(dplyr)
 ############each 0.125 degree grid, what is the sampling area ????
 ############ common grid have samples;
 
@@ -43,6 +43,7 @@ num_rows <- nrow(cmgrids)
 # Loop through each row
 for (i in 1:num_rows) {
   # Access the row using 'i'
+  i=3
   current_row <- cmgrids[i, ]
   print(paste('Processing Grid Number: ', i))
   
@@ -84,30 +85,30 @@ for (i in 1:num_rows) {
 
   
 
-  
-  #### another method  
-  #st_is_within_distance
-  gedi_sf <- st_as_sf(filtered_points, coords = c("V1", "V2"), crs = 4326)
-  is1_sf <- st_as_sf(filtered_points_is1, coords = c("V1", "V2"), crs = 4326)
-  
-  # Check if points are within the distance threshold from the reference point
-  is_within_distance <- st_is_within_distance(gedi_sf, is1_sf, dist = 500) #500 m
-  
-  ####  Here we only filter GEDI, can I filter IS1?
-  ####  I want both shots <= 1km?
-  
-  filtered_points$flag <- apply(is_within_distance , 1, any)
-  filtered_points <- filtered_points[filtered_points$flag == TRUE, ]
-  
-  ##update GEDI sf
-  gedi_sf <- st_as_sf(filtered_points, coords = c("V1", "V2"), crs = 4326)
-  is_within_distance <- st_is_within_distance(is1_sf, gedi_sf, dist = 500) #500 m
-  filtered_points_is1$flag <- apply(is_within_distance , 1, any)
-  filtered_points_is1 <- filtered_points_is1[filtered_points_is1$flag == TRUE, ]
 
-  
-  if (nrow(filtered_points) == 0) {next}
-  if (nrow(filtered_points_is1) == 0) {next}
+  # #### another method  with a buffer ----------------
+  # #st_is_within_distance
+  # gedi_sf <- st_as_sf(filtered_points, coords = c("V1", "V2"), crs = 4326)
+  # is1_sf <- st_as_sf(filtered_points_is1, coords = c("V1", "V2"), crs = 4326)
+  # 
+  # # Check if points are within the distance threshold from the reference point
+  # is_within_distance <- st_is_within_distance(gedi_sf, is1_sf, dist = 500) #500 m
+  # 
+  # ####  Here we only filter GEDI, can I filter IS1?
+  # ####  I want both shots <= 1km?
+  # 
+  # filtered_points$flag <- apply(is_within_distance , 1, any)
+  # filtered_points <- filtered_points[filtered_points$flag == TRUE, ]
+  # 
+  # ##update GEDI sf
+  # gedi_sf <- st_as_sf(filtered_points, coords = c("V1", "V2"), crs = 4326)
+  # is_within_distance <- st_is_within_distance(is1_sf, gedi_sf, dist = 500) #500 m
+  # filtered_points_is1$flag <- apply(is_within_distance , 1, any)
+  # filtered_points_is1 <- filtered_points_is1[filtered_points_is1$flag == TRUE, ]
+  # 
+  # 
+  # if (nrow(filtered_points) == 0) {next}
+  # if (nrow(filtered_points_is1) == 0) {next}
   
   plot(filtered_points$V1,filtered_points$V2 )
    ###Add the second point cloud to the plot
@@ -180,57 +181,144 @@ for (i in 1:num_rows) {
   # print(Spercent)
 }
 
+#### save result 
+###########################################
 
-#################fig 
-
-samples_df_order <- samples_df[order(samples_df$N_GEDI), ]
-
-# Example data frames
-df1 <- data.frame(
-  x = seq(1,nrow(samples_df_order)),
-  y = samples_df_order$N_GEDI,
-  group = "GEDI"
-)
-
-df2 <- data.frame(
-  x = seq(1,nrow(samples_df_order)),
-  y = samples_df_order$N_IS1,
-  group = "ICESat"
-)
-
-# Combine the data frames
-combined_df <- rbind(df1, df2)
+# Write the data frame to a CSV file
+#write.csv(samples_df, file = "Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Out/GEDI_IS1_buffer_0620.csv", row.names = FALSE)
+write.csv(samples_df, file = "Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Out/GEDI_IS1_withoutBuffer_0620.csv", row.names = FALSE)
 
 
 
-# Plot the values using ggplot
-ggplot(combined_df , aes(x , y =y , fill = group)) +
-  geom_bar(stat = "identity", position = "identity") +
-  xlab("Grid index") +
-  ylab("Number of GEDI/IS1 shots per grid") + 
-  coord_cartesian(clip = "off", ylim= c(0,1000))
+######### grid plot 
+write.csv(filtered_points, file = "Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Out/grid_3_GEDI_filtered_points_with_buffer_0620.csv", row.names = FALSE)
+write.csv(filtered_points_is1, file = "Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Out/grid_3_IS1_filtered_points_with_buffer_0620.csv", row.names = FALSE)
+
+write.csv(filtered_points, file = "Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Out/grid_3_GEDI_filtered_points_0620.csv", row.names = FALSE)
+write.csv(filtered_points_is1, file = "Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Out/grid_3_IS1_filtered_points_0620.csv", row.names = FALSE)
+
+
+###### read gird 3 data
+
+grid_3_dt_gedi  <- read.csv("Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Out/grid_3_GEDI_filtered_points_0620.csv")
+grid_3_dt_gedi  <- grid_3_dt_gedi[, 1:3]
+grid_3_dt_is1  <- read.csv("Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Out/grid_3_IS1_filtered_points_0620.csv")
+grid_3_dt_is1 <- grid_3_dt_is1[, 1:3]
+grid_3_dt_gedi_buffer  <- read.csv("Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Out/grid_3_GEDI_filtered_points_with_buffer_0620.csv")
+grid_3_dt_is1_buffer  <- read.csv("Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Out/grid_3_IS1_filtered_points_with_buffer_0620.csv")
+grid_3_dt_gedi_buffer  <- grid_3_dt_gedi_buffer[, 1:3]
+grid_3_dt_is1_buffer <- grid_3_dt_is1_buffer[, 1:3]
+
+##### Fig points in grid
+# Define a function to create a scatter plot
+PlotGrid <- function(data) {
+  # Create the scatter plot
+  plot <- ggplot(data, aes(x = V1, y = V2, color = dataset)) +
+    geom_point() +
+    labs(color = "Dataset")+
+    xlim(-89.55469,-89.42969)+
+    ylim(46.19531, 46.32031)+
+    xlab('Lon')+
+    ylab('Lat')+
+    theme_bw()+
+    theme(#panel.grid = element_blank(),
+      legend.position = c(0.1,0.9))
+  # Return the plot
+  return(plot)
+}
+
+
+# Combine the datasets with a grouping variable
+data <- rbind(transform(grid_3_dt_gedi, dataset = "GEDI"),
+              transform(grid_3_dt_is1, dataset = "ICESat"))
+
+# Create a scatter plot with points from both datasets
+p1_grid_3_no_buffer<- PlotGrid(data) 
+
+data <- rbind(transform(grid_3_dt_gedi_buffer, dataset = "GEDI"),
+              transform(grid_3_dt_is1_buffer, dataset = "ICESat"))
+# Create a scatter plot with points from both datasets
+p1_grid_3_with_buffer<- PlotGrid(data) 
+
+library(ggpubr)
+ggarrange(p1_grid_3_no_buffer, p1_grid_3_with_buffer, 
+          labels = c("A", "B"),
+          ncol = 2, nrow = 1)
+
+
+#################fig grids and number of GEDI/IS1
+### read data 
+samples_df_with_buffer <- read.csv('Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Out/GEDI_IS1_buffer_0620.csv')
+samples_df_no_buffer <- read.csv('Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Out/GEDI_IS1_withoutBuffer_0620.csv')
+
+
+# Define a function to create a scatter plot
+PlotSamples <- function(data) {
+  samples_df <- data
+  samples_df_order <- samples_df[order(samples_df$N_GEDI), ]
+  # Example data frames
+  df1 <- data.frame(
+    x = seq(1,nrow(samples_df_order)),
+    y = samples_df_order$N_GEDI,
+    dataset = "GEDI"
+  )
   
+  df2 <- data.frame(
+    x = seq(1,nrow(samples_df_order)),
+    y = samples_df_order$N_IS1,
+    dataset = "ICESat"
+  )
+  # Combine the data frames
+  combined_df <- rbind(df1, df2)
+  xtitle <- expression(paste("Grid (0.125", degree, ") index"))
+  # Plot the values using ggplot
+  plot <-  ggplot(combined_df , aes(x = x , y = y , fill = dataset)) +
+    geom_bar(stat = "identity", position = "identity" , alpha = 0.8, width = 1) +
+    # xlim(1,100)+
+    # ylim(0,2000)+
+    # xlab("Grid (0.125) index") +
+    xlab( xtitle ) +
+    ylab("Number of GEDI_calval/IS1 shots per grid") + 
+    coord_cartesian( ylim= c(0,1000))+
+    theme_bw()+
+    theme(panel.grid = element_blank(),
+          legend.position = c(0.1,0.9))+
+    scale_x_continuous(expand = c(0, 0)) +  # Remove space on x-axis
+    scale_y_continuous(expand = c(0, 0))  # Remove space on y-axis
+  # Return the plot
+  return(plot)
+}
 
+p2_samples_no_buffer<- PlotSamples(samples_df_no_buffer)
+p2_samples_with_buffer<- PlotSamples(samples_df_with_buffer)
+
+ggarrange(p2_samples_no_buffer, p2_samples_with_buffer, 
+          labels = c("A", "B"),
+          ncol = 2, nrow = 1)
 
  
-samples_df$diff_number  <-  samples_df$N_GEDI - samples_df$N_IS1
-
-ggplot(samples_df , aes(Grid , diff)) +
-  geom_bar(stat = "identity") +
-  xlab("Grids number") +
-  ylab("GEDI - IS1 diff") +
-  ylim(-10, 10)
+# samples_df$diff_number  <-  samples_df$N_GEDI - samples_df$N_IS1
+# 
+# ggplot(samples_df , aes(Grid , diff)) +
+#   geom_bar(stat = "identity") +
+#   xlab("Grids number") +
+#   ylab("GEDI - IS1 diff") +
+#   ylim(-10, 10)
 
 ## his
-ggplot(samples_df , aes(diff )) +
-  geom_histogram(binwidth = 2, position = "identity", alpha = 0.7) +
-  xlab("Difference") +
-  ylab("GEDI/IS1 number")
+# ggplot(samples_df , aes(diff )) +
+#   geom_histogram(binwidth = 1, position = "identity", alpha = 0.7) +
+#   xlab("Difference") +
+#   ylab("GEDI/IS1 number")
 
 
 #### median plot 
 
 #### 
+
+
+PlotMedian<- function(data) {
+samples_df <- data
 result <- cbind(samples_df$IS1_h,samples_df$GEI_h)
 result <- data.frame(result)  
 colnames(result) <- c('is1_values', 'gedi_rh98')
@@ -239,16 +327,15 @@ height_bins <- cut(result$is1_values, breaks = seq(0.5,60.5))
 
 # Group data by height class and calculate mean weight
 gedi_median <- aggregate(result$gedi_rh98, by = list(height_class = height_bins), FUN = median)
-gedi_mean <- aggregate(result$gedi_rh98, by = list(height_class = height_bins), FUN = mean)
+#gedi_mean <- aggregate(result$gedi_rh98, by = list(height_class = height_bins), FUN = mean)
 gedi_median_x <- as.character(gedi_median$height_class)
-
 
 # Load the stringr package
 library(stringr)
 gedi_median_x <-  str_extract(gedi_median_x, "(?<=\\,).*?(?=\\.)")
 gedi_median_x <- as.numeric(gedi_median_x)
 # Calculate the number of samples in each class
-height_bins <- cut(result$is1_values, breaks = seq(0.5,60.5,2))
+height_bins <- cut(result$is1_values, breaks = seq(0.5,60.5))
 
 result$height_class <- height_bins 
 
@@ -263,31 +350,31 @@ df_1 <- data.frame(gedi_median_x, gedi_median$x ) # median
 colnames(df_1) <- c('x', 'y')
 
 df_1<- merge(df_1, sample_counts, by = "x", all = TRUE)
-df_1['type'] = 'median'
-df_2 <- data.frame(gedi_median_x, gedi_mean$x) # mean
-colnames(df_2) <- c('x', 'y')
-
-
-df_2<- merge(df_2, sample_counts, by = "x", all = TRUE)
-df_2['type'] = 'mean'
-# Combine the data frames
-
-
-combined_df <- rbind(df_1, df_2)
-# Remove NA rows
-combined_df <- na.omit(combined_df)
+df_1['dataset'] = 'median'
+# df_2 <- data.frame(gedi_median_x, gedi_mean$x) # mean
+# colnames(df_2) <- c('x', 'y')
+# 
+# 
+# df_2<- merge(df_2, sample_counts, by = "x", all = TRUE)
+# df_2['type'] = 'mean'
+# # Combine the data frames
+# 
+# 
+# combined_df <- rbind(df_1, df_2)
+# # Remove NA rows
+# combined_df <- na.omit(combined_df)
 
 df_1 <- na.omit(df_1 )
 
-p2 <- ggplot(combined_df,aes(x , y , color = type, fill = type)) +
-  geom_point(aes(shape=type),size =3) +
+p2 <- ggplot(df_1,aes(x , y , color = dataset, fill = dataset)) +
+  geom_point(aes(shape=dataset),size =3) +
   scale_color_manual(values = c("mean" = "red", "median" = "blue") )+
   #scale_fill_manual(values = c("mean" = "orange", "median" = "lightblue") )+
   scale_shape_manual(values = c("mean" = 16, "median" = 17))+
   theme_bw()+
   theme(plot.title = element_text(hjust = 0.5),
         panel.grid = element_blank(),
-        #legend.position = c(0.1, 0.8),
+        legend.position = c(0.1, 0.9),
   )+
   geom_abline(slope = 1, intercept = 0, color = "black", linetype = "dashed",linewidth = 1 )+
   xlim(c(0,30)) +
@@ -298,7 +385,89 @@ p2 <- ggplot(combined_df,aes(x , y , color = type, fill = type)) +
   #                                 scientific = FALSE)), vjust = -1, size = 5)+
   labs(x = "Icesat-1 [m]", y = "GEDI_cal/val_shots [m]", title = "Median of GEDI at 1/8° from ICESat")
 
-p2
+return (p2)
+}
+
+
+p3_median_no_buffer<- PlotMedian(samples_df_no_buffer)
+p3_median_with_buffer<- PlotMedian(samples_df_with_buffer)
+
+ggarrange(p3_median_no_buffer, p3_median_with_buffer, 
+          labels = c("A", "B"),
+          ncol = 2, nrow = 1)
+
+
+
+#####fig x = is1 height binds ,  y = box plot
+
+
+result <- samples_df_with_buffer
+result <- data.frame(result)  
+
+# Define height class intervals
+height_bins <- cut(result$IS1_h, breaks = seq(0.5,60.5))
+
+# Define the desired bin heights
+bin_heights <- seq(0.5,60.5)
+
+# Convert heights to a factor with specified levels
+heights_factor <- factor(result$IS1_h, levels = bin_heights)
+
+# Create a table with counts of each bin height
+heights_table <- table(heights_factor)
+
+# Add zero counts for missing bin heights
+complete_table <- addNA(heights_table)
+
+
+
+
+# Load the stringr package
+library(stringr)
+result$height_class <- height_bins 
+result <- addNA(result)
+# Create two sample datasets
+dataset1 <- data.frame(x = result$height_class,
+                       N = result$N_GEDI,
+                       group = "GEDI")
+dataset2 <- data.frame(x = result$height_class,
+                       N = result$N_IS1,
+                       group = "IS1")
+
+# Merge the datasets
+data <- rbind(dataset1, dataset2)
+
+# Create a combined boxplot
+ggplot(data, aes(x = x, y = N, fill = group)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  scale_fill_manual(values = c("GEDI" = "blue", "IS1" = "red"))
+
+
+
+
+
+
+
+
+
+
+
+## six plots together.
+
+ggarrange(p1_grid_3_no_buffer, p1_grid_3_with_buffer, 
+          p2_samples_no_buffer, p2_samples_with_buffer, 
+          p3_median_no_buffer, p3_median_with_buffer, 
+          labels = c("A", "B", 'C', 'D', 'E', 'F'),
+          ncol = 2, nrow = 3)
+
+
+
+
+
+
+
+
 
 
 # Save the plot as a TIFF file
