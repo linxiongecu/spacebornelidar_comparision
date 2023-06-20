@@ -5,22 +5,30 @@ import subprocess
 import multiprocessing
 
 # set the corners of your ROI in geographic coordinates - this example is for Maryland
-lon_min = -180 * 1000
-lon_max = 180 * 1000
-lat_min = -52 * 1000
-lat_max = 52 * 1000
+#lon_min = -180 * 1000
+#lon_max = 180 * 1000
+#lat_min = -52 * 1000
+#lat_max = 52 * 1000
 
 # list to store subsetting commands
 cmd_list = []
+#####Step 1: reduce grids number first
+##### read from IS1 gridded at 0.125 degree csv data
+import pandas as pd
 
+# Read CSV file into a DataFrame
+df = pd.read_csv('/gpfs/data1/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Out/is1_global_0dot125degree_gridded.csv')
 
-# loop through latitudes
-for i in range(1, 2880):
-    # loop through longitudes
-    for j in range(1, 832):
+# Display the DataFrame
+#print(df)
+
+# Loop through every row
+for index, row in df.iterrows():
+        lon = row['x']
+        lat = row['y']
         # pass necessary info to subsetting command
-        lon = -180 + i *0.125
-        lat = -52 + j * 0.125
+        #lon = -180 + i *0.125
+        #lat = -52 + j * 0.125
         cmd = 'python IS1bufferFunction.py --lon %f  --lat %f ' % (lon, lat)
         cmd_list.append(cmd)
 

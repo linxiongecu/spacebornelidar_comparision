@@ -5,6 +5,9 @@ load('Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Data/icesat_glas_umd_v1.RData
 is1 <- glas_veg[, c('lon', 'lat', 'ht')]
 
 ########### how many 0.125 degree grids ????
+# grid IS1 first, export to gridded xyz.
+#############
+
 
 
 for (i in 1:2880-1) {

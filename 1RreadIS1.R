@@ -108,7 +108,7 @@ writeRaster(x, filename = "IS1_raster_14km_mean_growingSeason.tif", format = "GT
 # Convert raster to XYZ format
 xyz_data <- rasterToPoints(x)
 # Write the data frame to a CSV file
-write.csv(xyz_data, file = "is1_global.csv", row.names = FALSE)
+write.csv(xyz_data, file = "Z:/vclgp/xiongl/HeightComparisonGEDI_IS2_IS1/Out/is1_global_0dot125degree_gridded.csv", row.names = FALSE)
 
 library(rasterVis)
 # Interpolate the raster
